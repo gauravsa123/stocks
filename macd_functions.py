@@ -131,8 +131,13 @@ class MACD():
             elif self.macd_flag[i] == -1:
                 self.position[i] = 0
             else:
-                self.position[i] = self.position[i-1]                
-        return
+                self.position[i] = self.position[i-1]     
+
+        self.position_change = np.diff(self.position, prepend=self.position[0])
+        self.decision = np.where(self.position_change>0, 'buy', 
+                            np.where(self.position_change<0, 'sell',
+                                    'hold'))           
+        return 
 
     def plot(self, num=100, buy_price=None, sell_price=None, flag=False):
         plt.figure(figsize=(12,8))
