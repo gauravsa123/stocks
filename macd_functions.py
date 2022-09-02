@@ -197,6 +197,7 @@ def plot_returns(dict1, dict2, label1='macd', label2='buy_hold'):
     plt.xticks(rotation=90)
     plt.legend()
     plt.grid(visible=True)
+    plt.ylabel('Percentage Returns %', fontdict={'size':16})
     plt.show()
     return
 
