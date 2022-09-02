@@ -188,6 +188,18 @@ def color_func(val):
     color = 'green' if val == 'buy' else 'red' if val == 'sell' else 'yellow'
     return 'background-color: {}'.format(color)	
 
+def plot_returns(dict1, dict2, label1='macd', label2='buy_hold'):
+    plt.figure(figsize=(12,6))
+    x1, y1 = zip(*list(dict1.items()))
+    plt.plot(x1, y1, '.-', label=label1)
+    x2, y2 = zip(*list(dict2.items()))
+    plt.plot(x2, y2, '.-', label=label2)
+    plt.xticks(rotation=90)
+    plt.legend()
+    plt.grid(visible=True)
+    plt.show()
+    return
+
 ###============    
 
 # period = '2y'
