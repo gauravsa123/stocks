@@ -179,7 +179,7 @@ class MACD():
         percnt_return = (total_return/invest_val)*100
         print('\nGains from the MACD strategy: {}, with %: {} \n'.format(total_return, percnt_return))
 
-        return total_return, num_stocks
+        return total_return, num_stocks, percnt_return
 
 
 ####-------------------
