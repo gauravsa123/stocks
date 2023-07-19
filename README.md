@@ -1,3 +1,5 @@
 # stocks
 
-Functions to carry out MACD strategy based trading
+Functions to carry out strategy based trading
+- MACD
+- Bollinger Bands
