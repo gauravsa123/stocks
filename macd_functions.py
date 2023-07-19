@@ -184,6 +184,13 @@ class MACD():
 
 ####-------------------
 
+def get_decision(dict1, timeframe=5):
+    decision_df = pd.DataFrame(dict1)
+    ## Selecting shares which have Buy or Sell call
+    decision_df = decision_df.loc[:, (decision_df != 'hold').any(axis=0)]
+    decision_df.index = ['day -{}'.format(t) for t in range(timeframe, 0, -1)]
+    return decision_df
+	
 def color_func(val):
     color = 'green' if val == 'buy' else 'red' if val == 'sell' else 'yellow'
     return 'background-color: {}'.format(color)	
