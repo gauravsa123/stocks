@@ -173,11 +173,100 @@ class MACD():
         num_stocks = math.floor(invest_val/self.hist['Close'][0])
 
         self.hist['daily_return'] = self.hist['Close'].diff().fillna(0)
-        self.hist['macd_return'] = self.hist['daily_return'] * self.position
+        self.hist['macd_return'] = self.hist['daily_return'].shift(-1).fillna(0) * self.position
 
         total_return = np.sum((self.hist['macd_return']*num_stocks).values)
         percnt_return = (total_return/invest_val)*100
         print('\nGains from the MACD strategy: {}, with %: {} \n'.format(total_return, percnt_return))
+
+        return total_return, num_stocks, percnt_return
+
+
+
+class BollingerBands():
+    def __init__(self, name, period, window, nb_stddev=2):
+        self.name = name
+        self.period = period
+        self.window = window
+        self.nb_stddev = nb_stddev
+        self.stock = StockInfo(name, period)
+        self.hist = self.stock.hist
+        self.get_bb()
+        self.implement_strategy()
+
+    def get_bb(self):
+        std = self.hist['Close'].rolling(self.window).std()
+        self.hist['middle_bb'] = self.hist['Close'].rolling(self.window).mean()
+        self.hist['upper_bb'] = self.hist['middle_bb'] + std * self.nb_stddev
+        self.hist['lower_bb'] = self.hist['middle_bb'] - std * self.nb_stddev
+        return 
+
+    def implement_strategy(self):    
+        trace = self.hist['Close']
+        buy_limit = self.hist['lower_bb']
+        sell_limit = self.hist['upper_bb']
+        self.buy_price = np.ones(self.hist['Close'].shape) * np.nan
+        self.sell_price = np.ones(self.hist['Close'].shape) * np.nan
+        self.bb_flag = np.zeros(self.hist['Close'].shape)
+        self.position = np.zeros(self.hist['Close'].shape)
+        flag = 0
+
+        for i in range(len(self.hist['upper_bb'])):
+            if trace[i] < buy_limit[i]:
+                # if flag != 1:
+                    self.buy_price[i] = self.hist['Close'][i]
+                    flag = 1
+                    self.bb_flag[i] = flag
+            elif trace[i] > sell_limit[i]:
+                # if flag != -1:
+                    self.sell_price[i] = self.hist['Close'][i]
+                    flag = -1
+                    self.bb_flag[i] = flag
+
+        ## Get Positions
+        for i in range(self.position.shape[0]):
+            if self.bb_flag[i] == 1:
+                self.position[i] = 1
+            elif self.bb_flag[i] == -1:
+                self.position[i] = 0
+            else:
+                self.position[i] = self.position[i-1]  
+
+        self.position_change = np.diff(self.position, prepend=self.position[0])
+        self.decision = np.where(self.position_change>0, 'buy', 
+                                 np.where(self.position_change<0, 'sell',
+                                          'hold'))
+        return
+
+    def plot(self, num=100, buy_price=None, sell_price=None, flag=True):
+        plt.figure(figsize=(12,8))
+        ax1 = plt.subplot2grid((10,1), (0,0), rowspan = 5, colspan = 1)
+
+        ax1.plot(self.hist['Close'][-num:])
+        ax1.plot(self.hist['middle_bb'][-num:], linewidth=0.5, color='m', linestyle='dashed', dashes=(10, 10))
+        ax1.plot(self.hist['upper_bb'][-num:], linewidth=0.5, color='m')
+        ax1.plot(self.hist['lower_bb'][-num:], linewidth=0.5, color='m')
+        if flag == True:
+            ax1.plot(self.hist['Close'].index[-num:], self.buy_price[-num:], marker = '^', color = 'green', 
+                     markersize = 10, label = 'BUY SIGNAL', linewidth = 0)
+            ax1.plot(self.hist['Close'].index[-num:], self.sell_price[-num:], marker = 'v', color = 'r', 
+                     markersize = 10, label = 'SELL SIGNAL', linewidth = 0)
+            ax1.legend()
+
+        ax1.set_title(self.name, fontsize=25.0, color='b')
+        plt.legend()
+        plt.show()
+
+
+    def get_returns(self, invest_val=100000):
+        num_stocks = math.floor(invest_val/self.hist['Close'][0])
+
+        self.hist['daily_return'] = self.hist['Close'].diff().fillna(0)
+        self.hist['bb_return'] = self.hist['daily_return'].shift(-1).fillna(0) * self.position
+
+        total_return = np.sum((self.hist['bb_return']*num_stocks).values)
+        percnt_return = (total_return/invest_val)*100
+        print('\nGains from the BB strategy: {}, with %: {} \n'.format(total_return, percnt_return))
 
         return total_return, num_stocks, percnt_return
 
