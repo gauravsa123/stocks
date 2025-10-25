@@ -20,7 +20,7 @@ SBI Focused Equity Fund Direct Growth,flexi_4,119727
 UTI Nifty Midcap 150 Quality 50 Index Fund - Direct - Growth,mid_2,150313
 Aditya Birla Sun Life Balanced Advantage Fund - Growth Direct,hybrid_5,131670
 Aditya Birla Sun Life Flexi Cap Fund - Growth-Regular,flexi_4,103166
-ABSL Global Excellence Equity FoF - Retail - Direct - Growth,large_3,132009
+ABSL Global Excellence Equity FoF - Retail - Direct - Growth,hedge_6,132009
 Axis India Manufacturing Fund Regular Growth,flexi_4,152205
 JM Aggressive Hybrid Fund - (Regular) - Growth Option,hybrid_5,100221
 JM Midcap Fund (Regular) - Growth Option,mid_2,150815
@@ -42,4 +42,5 @@ Quant infra,flexi_4,106170
 Quant small,small_1,100177
 Bandhan Nifty Alpha 50 Index Fund - Direct Plan - Growth,flexi_4,152177
 Edelweiss Nifty 100 Quality 30 Index Fund Direct Plan Growth,large_3,149254
+
 
