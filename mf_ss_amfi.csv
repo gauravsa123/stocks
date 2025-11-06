@@ -1,6 +1,6 @@
 id,name,code
 hybrid_5,absl equity hybrid 95 fund regular growth,103155
-mid_2,absl gennext fund regular growth,103111
+mid_2,absl Consumption (gennext) fund regular growth,103111
 hybrid_5,absl regular savings fund direct,101818
 large_3,canara robeco bluechip equity fund direct plan growth,118269
 flexi_4,canara robeco consumer trends reg-g,112152
@@ -19,3 +19,4 @@ small_1,nippon india small cap,113177
 flexi_4,pgim india flexicap,133839
 mid_2,pgim india midcap,125307
 flexi_4,union flexicap,119292
+mid_2, HDFC Nifty200 momentum 30,
