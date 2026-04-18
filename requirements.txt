@@ -1,6 +1,7 @@
-mftool==2.9
+mftool==3.2
 yfinance
 pandas
 numpy
 matplotlib
 tqdm
+plotly
