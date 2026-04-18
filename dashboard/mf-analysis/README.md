@@ -1,66 +1,163 @@
-# Mutual Fund Analysis Project
+# 📊 Mutual Fund Analysis Dashboard
 
-This project provides a comprehensive analysis of mutual funds using various financial ratios and visualizations. It includes a Streamlit application for user-friendly interaction and result display.
+A comprehensive mutual fund analysis tool with financial ratios, MACD signals, rolling performance metrics and an interactive Streamlit dashboard.
 
-## Project Structure
+---
+
+## 📁 Project Structure
 
 ```
 mf-analysis
 ├── src
-│   ├── main.py               # Entry point of the application
-│   ├── macd_functions.py     # Functions related to MACD calculations
-│   ├── mf_analysis.py        # Main logic for mutual fund analysis
-│   ├── ratios.py             # Functions to calculate financial ratios
-│   └── streamlit_app.py      # Streamlit application for displaying results
+│   ├── main.py               # Core analysis engine (ratios, rolling, ATH, CAGR)
+│   ├── streamlit_app.py      # Interactive Streamlit dashboard
+│   ├── macd_functions.py     # MACD calculation & buy/sell signal logic
+│   ├── mf_analysis.py        # NAV data loading & fund filtering helpers
+│   └── ratios.py             # Financial ratio calculations (Sharpe, Beta, etc.)
 ├── data
-│   └── mf_ga_amfi.csv        # Mutual fund data for analysis
-├── requirements.txt          # Project dependencies
-└── README.md                 # Project documentation
+│   ├── mf_ga_amfi.csv        # Default portfolio CSV (name, code, id)
+│   └── portfolio.csv         # Auto-saved user portfolio (generated at runtime)
+├── output                    # Auto-created; stores charts & result CSV
+│   ├── mf_results.csv
+│   ├── ath_change.png
+│   ├── ratio_<name>.png
+│   └── rolling_<category>.png
+├── requirements.txt
+└── README.md
 ```
 
-## Setup Instructions
+---
 
-1. **Clone the repository**:
-   ```
+## ⚙️ Setup
+
+1. **Clone the repository**
+   ```bash
    git clone <repository-url>
    cd mf-analysis
    ```
 
-2. **Install dependencies**:
-   It is recommended to use a virtual environment. You can create one using `venv` or `conda`. After activating your environment, run:
+2. **Create and activate a virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate       # macOS / Linux
+   venv\Scripts\activate          # Windows
    ```
+
+3. **Install dependencies**
+   ```bash
    pip install -r requirements.txt
    ```
 
-3. **Data Preparation**:
-   Ensure that the `data/mf_ga_amfi.csv` file is present in the `data` directory. This file contains the mutual fund data required for analysis.
+---
 
-## Usage
+## 🚀 Usage
 
-1. **Run the analysis**:
-   To execute the mutual fund analysis, run the following command:
-   ```
-   python src/main.py
-   ```
+### Run analysis from terminal
+```bash
+python src/main.py
 
-2. **Launch the Streamlit application**:
-   To view the results in a web application, run:
-   ```
-   streamlit run src/streamlit_app.py
-   ```
+# With a custom ATH cutoff date
+python src/main.py --cutoff 2024-06-01
+```
 
-## Analysis Overview
+### Launch Streamlit dashboard
+```bash
+streamlit run src/streamlit_app.py
+```
 
-The project performs the following analyses on mutual funds:
+---
 
-- Calculation of financial ratios such as Sharpe Ratio, Alpha, Beta, and Information Ratio.
-- Visualization of results using Streamlit for better user interaction.
-- Comparison of mutual fund performance against benchmarks.
+## 🖥️ Streamlit Dashboard Features
 
-## Contributing
+### ➕ Portfolio Management (Sidebar)
+| Feature | Details |
+|---------|---------|
+| 🔍 Search | Live search across all AMFI funds as you type (≥ 2 chars) |
+| 📂 Upload CSV | Upload a previously saved portfolio CSV |
+| ♻️ Replace | Replace current portfolio with uploaded CSV |
+| ➕ Merge | Merge uploaded CSV into existing portfolio (no duplicates) |
+| 🗑 Remove | Remove individual funds or clear all |
+| ⬇️ Download | Export current portfolio as CSV |
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue for any suggestions or improvements.
+### 📅 ATH Cutoff Date (Sidebar)
+- Defaults to **26-Sep-2024**
+- User can select any custom date via date picker
+- Changing the date auto-invalidates cache and reruns analysis
 
-## License
+### 📋 Tab 1 — Summary
+- Filterable table of all funds with ratios and CAGR
+- KPI cards: Best Sharpe, Best Alpha, Best CAGR, Lowest Beta
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+### 📉 Tab 2 — ATH Change
+- Color-coded dot plot of % NAV change from selected cutoff date
+- 🟢 > 5% &nbsp; 🔵 0–5% &nbsp; 🟠 0 to -5% &nbsp; 🔴 < -5%
+
+### 📊 Tab 3 — Ratios
+- Horizontal bar chart per ratio, grouped by fund category
+- 🕸 Radar chart to compare multiple funds across all ratios
+
+### 🔄 Tab 4 — Rolling Ratios
+- 18-month rolling ratio line chart per category
+- Selectable category and ratio
+
+---
+
+## 📐 Metrics Computed
+
+| Metric | Description |
+|--------|-------------|
+| **CAGR** | Compound Annual Growth Rate over the analysis period |
+| **Beta** | Sensitivity to market (Nifty 50) movements |
+| **Sharpe Ratio** | Risk-adjusted return over risk-free rate |
+| **Alpha** | Excess return over expected CAPM return |
+| **Information Ratio** | Excess return over benchmark per unit of tracking error |
+| **Up Capture** | Performance relative to benchmark in up markets |
+| **Down Capture** | Performance relative to benchmark in down markets |
+
+---
+
+## 📄 Portfolio CSV Format
+
+The portfolio CSV used for analysis must contain these columns:
+
+```csv
+name,code,id
+Mirae Asset Large Cap Fund,118989,large_3
+Nippon India Small Cap Fund,118778,small_1
+```
+
+| Column | Description |
+|--------|-------------|
+| `name`  | Full scheme name |
+| `code`  | AMFI scheme code |
+| `id`    | Category: `large_3`, `mid_2`, `small_1`, `flexi_4` |
+
+---
+
+## 🔗 Data Sources
+
+| Source | Usage |
+|--------|-------|
+| [AMFI India](https://www.amfiindia.com/spages/NAVAll.txt) | Live fund search & NAV data |
+| [Yahoo Finance](https://finance.yahoo.com) | Nifty 50 (market) & risk-free fund data |
+
+---
+
+## 📦 Dependencies
+
+```
+pandas
+numpy
+yfinance
+mftool
+streamlit
+plotly
+requests
+matplotlib
+```
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License. See the `LICENSE` file

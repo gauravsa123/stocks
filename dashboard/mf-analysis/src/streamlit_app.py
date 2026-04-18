@@ -290,6 +290,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # ════════════════════════════════════════════════════════════════════════════
 with tab1:
     st.subheader("Fund Summary")
+    st.caption("'mid', 'small', 'large', 'flexi' --> market category benchmark ratios")
     cats = ["All"] + sorted(mf_df["id"].unique().tolist())
     selected_cat = st.selectbox("Filter by Category", cats)
     filtered = summary_df if selected_cat == "All" else summary_df[summary_df["id"] == selected_cat]
@@ -313,6 +314,7 @@ with tab1:
 # ════════════════════════════════════════════════════════════════════════════
 with tab2:
     st.subheader(f"% Change from ATH ({cutoff_date.strftime('%d-%b-%Y')})")   # ← dynamic
+    st.caption("Percentage change from the all-time high (ATH) value. MFs having returns >0 shows good recovery compared to Market and other peers. MFs are color coded in Plot for segregation.")
 
     change_list, names = [], []
     for name, vals in mf_fall.items():
@@ -326,7 +328,7 @@ with tab2:
 
     def ath_color(v):
         if v > 5:    return "green"
-        elif v > 0:  return "blue"
+        elif v > 0:  return "magenta"
         elif v > -5: return "orange"
         else:        return "red"
 
@@ -340,8 +342,30 @@ with tab2:
         line=dict(color="lightgrey", width=1),
         hovertemplate="%{y}: %{x:.2f}%<extra></extra>",
     ))
-    fig_ath.add_vline(x=0, line_dash="dash", line_color="black", line_width=1)
-    fig_ath.update_layout(height=max(500, len(ath_df) * 20), xaxis_title="% Change", margin=dict(l=250))
+    fig_ath.add_vline(x=0, line_dash="dash", line_color="white", line_width=1)
+    fig_ath.add_vline(x=-5, line_dash="dash", line_color="white", line_width=0.5)
+    fig_ath.add_vline(x=5, line_dash="dash", line_color="white", line_width=0.5)
+
+    # ── Colored Y-axis labels via annotations ─────────────────────────────
+    x_anchor = ath_df["change"].min() - 1   # place labels just left of the plot
+    for _, row in ath_df.iterrows():
+        fig_ath.add_annotation(
+            x=x_anchor,
+            y=row["name"],
+            text=row["name"],
+            showarrow=False,
+            xanchor="right",
+            xref="x",
+            yref="y",
+            font=dict(color=row["color"], size=11),
+        )
+
+    fig_ath.update_yaxes(showticklabels=False)   # hide default tick labels
+    fig_ath.update_layout(
+        height=max(500, len(ath_df) * 20),
+        xaxis_title="% Change",
+        margin=dict(l=250),
+    )
     st.plotly_chart(fig_ath, use_container_width=True)
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -349,7 +373,19 @@ with tab2:
 # ════════════════════════════════════════════════════════════════════════════
 with tab3:
     st.subheader("Performance Ratios by Fund")
+
+    RATIO_CAPTIONS = {
+        "beta":         "📐 **Beta** — Measures fund's sensitivity to market movements. Beta < 1 means less volatile than market, > 1 means more volatile.",
+        "sharpe":       "⚖️ **Sharpe Ratio** — Risk-adjusted return over the risk-free rate. Higher is better; > 1 is considered good.",
+        "alpha":        "🎯 **Alpha** — Excess return generated over the expected CAPM return. Positive alpha means the fund outperformed expectations.",
+        "info":         "📡 **Information Ratio** — Consistency of excess returns over the benchmark. Higher means more consistent outperformance.",
+        "up_capture":   "📈 **Up Capture Ratio** — How much of the benchmark's gains the fund captured in rising markets. > 100% means outperformed benchmark on the way up.",
+        "down_capture": "📉 **Down Capture Ratio** — How much of the benchmark's losses the fund suffered in falling markets. < 100% means fund fell less than benchmark.",
+    }
+
     selected_ratio = st.selectbox("Select Ratio", RATIO_NAMES)
+    st.caption(RATIO_CAPTIONS[selected_ratio])
+
     ratio_df = mf_df[["name", "id", selected_ratio]].dropna().copy()
 
     fig_ratio = go.Figure()
