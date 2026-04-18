@@ -8,6 +8,7 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
+import uuid
 
 from main import (
     run_analysis, RATIO_NAMES, BENCHMARK_IDX, ALL_MFs, PORTFOLIO_PATH, DEFAULT_CUTOFF
@@ -36,23 +37,57 @@ def fetch_amfi_funds() -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
+
+def get_portfolio_path() -> str:
+    """Return a session-specific portfolio CSV path."""
+    session_dir = os.path.join(os.path.dirname(__file__), "../data/sessions")
+    os.makedirs(session_dir, exist_ok=True)
+    return os.path.join(session_dir, f"portfolio_{st.session_state.session_id}.csv")
+
+
 def save_portfolio_csv():
-    """Save current session portfolio to CSV for analysis."""
     if not st.session_state.get("portfolio_funds"):
         return None
-    os.makedirs(os.path.dirname(PORTFOLIO_PATH), exist_ok=True)
+    path = get_portfolio_path()
     df = pd.DataFrame(st.session_state.portfolio_funds)[["name", "id", "code"]]
-    df.to_csv(PORTFOLIO_PATH, index=False)
-    return PORTFOLIO_PATH
+    df.to_csv(path, index=False)
+    return path
 
 
 def load_portfolio_from_csv():
-    """Load portfolio CSV into session state on startup."""
-    if os.path.exists(PORTFOLIO_PATH):
-        df = pd.read_csv(PORTFOLIO_PATH)
+    path = get_portfolio_path()
+    if os.path.exists(path):
+        df = pd.read_csv(path)
         st.session_state.portfolio_funds = df.to_dict(orient="records")
 
 
+# ── Cleanup old session files (optional) ─────────────────────────────────────
+def cleanup_old_sessions(max_age_hours: int = 24):
+    """Delete session CSV files older than max_age_hours."""
+    import time
+    session_dir = os.path.join(os.path.dirname(__file__), "../data/sessions")
+    if not os.path.exists(session_dir):
+        return
+    now = time.time()
+    for fname in os.listdir(session_dir):
+        fpath = os.path.join(session_dir, fname)
+        if os.path.isfile(fpath):
+            age_hours = (now - os.path.getmtime(fpath)) / 3600
+            if age_hours > max_age_hours:
+                os.remove(fpath)
+
+
+cleanup_old_sessions()
+
+# ── Init session state ────────────────────────────────────────────────────────
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())[:8]   # unique per browser tab
+
+if "portfolio_funds" not in st.session_state:
+    st.session_state.portfolio_funds = []
+    load_portfolio_from_csv()
+
+    
 # ── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="MF Analysis Dashboard",
@@ -62,11 +97,6 @@ st.set_page_config(
 
 st.title("📊 Mutual Fund Analysis Dashboard")
 st.markdown("Risk ratios, rolling performance & ATH change analysis.")
-
-# ── Init session state ────────────────────────────────────────────────────────
-if "portfolio_funds" not in st.session_state:
-    st.session_state.portfolio_funds = []
-    load_portfolio_from_csv()   # restore last saved portfolio on page load
 
 # ── Run Analysis ──────────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="⏳ Fetching data & computing ratios... this may take a few minutes.")
