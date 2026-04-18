@@ -4,4 +4,3 @@ numpy
 yfinance
 matplotlib
 plotly
-uuid

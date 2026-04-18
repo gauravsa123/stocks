@@ -77,7 +77,7 @@ def cleanup_old_sessions(max_age_hours: int = 24):
                 os.remove(fpath)
 
 
-cleanup_old_sessions()
+# cleanup_old_sessions()
 
 # ── Init session state ────────────────────────────────────────────────────────
 if "session_id" not in st.session_state:
@@ -87,7 +87,7 @@ if "portfolio_funds" not in st.session_state:
     st.session_state.portfolio_funds = []
     load_portfolio_from_csv()
 
-    
+
 # ── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="MF Analysis Dashboard",
