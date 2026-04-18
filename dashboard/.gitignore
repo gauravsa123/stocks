@@ -1,0 +1,4 @@
+mf-analysis/src/__pycache__/*
+*.pyc
+*.pyo
+*.pyd

@@ -299,15 +299,37 @@ with tab1:
 
     st.markdown("### 🏆 Top Performers")
     col1, col2, col3, col4 = st.columns(4)
-    best_sharpe = summary_df.loc[summary_df["sharpe"].idxmax()]
-    best_alpha  = summary_df.loc[summary_df["alpha"].idxmax()]
-    best_return = summary_df.loc[summary_df["returns_%"].idxmax()]
-    low_beta    = summary_df.loc[summary_df["beta"].idxmin()]
+    best_sharpe = filtered.loc[filtered["sharpe"].idxmax()]
+    best_alpha  = filtered.loc[filtered["alpha"].idxmax()]
+    best_return = filtered.loc[filtered["returns_%"].idxmax()]
+    low_beta    = filtered.loc[filtered["beta"].idxmin()]
 
-    col1.metric("Best Sharpe", best_sharpe["name"].split(" ")[0], f"{best_sharpe['sharpe']}")
-    col2.metric("Best Alpha",  best_alpha["name"].split(" ")[0],  f"{best_alpha['alpha']}%")
-    col3.metric("Best CAGR",   best_return["name"].split(" ")[0], f"{best_return['returns_%']}%")
-    col4.metric("Lowest Beta", low_beta["name"].split(" ")[0],    f"{low_beta['beta']}")
+    # ── Reduce metric font size ───────────────────────────────────────────
+    st.markdown("""
+        <style>
+        [data-testid="stMetricLabel"]  { font-size: 12px !important; }
+        [data-testid="stMetricValue"]  { font-size: 15px !important; }
+        [data-testid="stMetricDelta"]  { font-size: 12px !important; }
+        </style>
+    """, unsafe_allow_html=True)
+    col1.metric("***Best CAGR***",   best_return["name"], f"{best_return['returns_%']}%")
+    col2.metric("***Best Sharpe***", best_sharpe["name"], f"{best_sharpe['sharpe']}")
+    col3.metric("***Best Alpha***",  best_alpha["name"],  f"{best_alpha['alpha']}%")
+    col4.metric("***Lowest Beta***", low_beta["name"],    f"{low_beta['beta']}")
+
+    st.markdown("")   # spacer
+
+    # ── Row 2 ─────────────────────────────────────────────────────────────
+    best_info        = filtered.loc[filtered["info"].idxmax()]
+    best_up_capture  = filtered.loc[filtered["up_capture"].idxmax()]
+    best_down_capture = filtered.loc[filtered["down_capture"].idxmin()]   # lowest = best
+
+    col5, col6, col7, _ = st.columns(4)
+    col5.metric("***Best Info Ratio***",    best_info["name"],          f"{best_info['info']}")
+    col6.metric("***Highest Up Capture***", best_up_capture["name"],    f"{best_up_capture['up_capture']}%")
+    col7.metric("***Lowest Down Capture***", best_down_capture["name"], f"{best_down_capture['down_capture']}%")
+
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # TAB 2 – ATH Change  (update subheader to reflect chosen date)
@@ -375,16 +397,23 @@ with tab3:
     st.subheader("Performance Ratios by Fund")
 
     RATIO_CAPTIONS = {
-        "beta":         "📐 **Beta** — Measures fund's sensitivity to market movements. Beta < 1 means less volatile than market, > 1 means more volatile.",
-        "sharpe":       "⚖️ **Sharpe Ratio** — Risk-adjusted return over the risk-free rate. Higher is better; > 1 is considered good.",
-        "alpha":        "🎯 **Alpha** — Excess return generated over the expected CAPM return. Positive alpha means the fund outperformed expectations.",
-        "info":         "📡 **Information Ratio** — Consistency of excess returns over the benchmark. Higher means more consistent outperformance.",
-        "up_capture":   "📈 **Up Capture Ratio** — How much of the benchmark's gains the fund captured in rising markets. > 100% means outperformed benchmark on the way up.",
-        "down_capture": "📉 **Down Capture Ratio** — How much of the benchmark's losses the fund suffered in falling markets. < 100% means fund fell less than benchmark.",
+        "beta":         "📐 Beta — Measures fund's sensitivity to market movements. Beta < 1 means less volatile than market, > 1 means more volatile. \n Low value means less fluctuations compared to market and Good for short term durations",
+        "sharpe":       "⚖️ Sharpe Ratio — Risk-adjusted return over the risk-free rate. Higher is better; > 1 is considered good.",
+        "alpha":        "🎯 Alpha — Excess return generated over the expected market return.",
+        "info":         "📡 Information Ratio — Consistency of excess returns over the benchmark. Higher means more consistent outperformance. It quantifies a fund manager's skill and consistency in outperforming the market.",
+        "up_capture":   "📈 Up Capture Ratio — How much of the benchmark's gains the fund captured in rising markets. > 100% means outperformed benchmark on the way up.",
+        "down_capture": "📉 Down Capture Ratio — How much of the benchmark's losses the fund suffered in falling markets. < 100% means fund fell less than benchmark.",
     }
 
     selected_ratio = st.selectbox("Select Ratio", RATIO_NAMES)
-    st.caption(RATIO_CAPTIONS[selected_ratio])
+    # st.caption(RATIO_CAPTIONS[selected_ratio])
+    st.markdown(
+        f'<p style="font-size:16px; font-weight:bold; font-style:italic; color:white;">'
+        f'{RATIO_CAPTIONS[selected_ratio]}'
+        f'</p>', 
+        unsafe_allow_html=True
+    )
+
 
     ratio_df = mf_df[["name", "id", selected_ratio]].dropna().copy()
 
