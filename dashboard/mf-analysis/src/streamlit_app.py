@@ -77,15 +77,23 @@ def cleanup_old_sessions(max_age_hours: int = 24):
                 os.remove(fpath)
 
 
-# cleanup_old_sessions()
+cleanup_old_sessions()
 
 # ── Init session state ────────────────────────────────────────────────────────
+# Persist session_id in URL so same browser restores the same portfolio
 if "session_id" not in st.session_state:
-    st.session_state.session_id = str(uuid.uuid4())[:8]   # unique per browser tab
+    params = st.query_params
+    if "sid" in params:
+        # Returning user — reuse existing session id from URL
+        st.session_state.session_id = params["sid"]
+    else:
+        # New user — generate fresh id and write to URL
+        st.session_state.session_id = str(uuid.uuid4())[:8]
+        st.query_params["sid"] = st.session_state.session_id
 
 if "portfolio_funds" not in st.session_state:
     st.session_state.portfolio_funds = []
-    load_portfolio_from_csv()
+    load_portfolio_from_csv()   # loads from session-specific CSV
 
 
 # ── Page Config ───────────────────────────────────────────────────────────────
