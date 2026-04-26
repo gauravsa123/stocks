@@ -1,24 +1,27 @@
-name,id,code
-ABSL Flexi cap regular,flexi_4,103166
-Bandhan ELSS Tax saver FundGrowth,flexi_4,111569
-Canara Robeco Large Cap Direct,large_3,118269
-Canara Robeco Large and Mid Direct,mid_2,118278
-Canara Robeco Flexi Cap Fund,flexi_4,101922
-Canara Robeco Infrastructure,flexi_4,103390
-Canara Robeco Small Cap Fund,small_1,146127
-ICICI Pru Nifty 200 momentum 30,flexi_4,150452
-Invesco India Small Cap Fund,small_1,145139
-Invesco India Multi Asset Allocation Direct,hedge_6,153047
-Invesco India Midcap Fund Direct,mid_2,120403
-Invesco India Global Equity Income FOF Direct,hedge_6,129188
-NIPPON INDIA GROWTH FUND,mid_2,118668
-quant Aggressive Hybrid,hybrid_5,120819
-quant Flexi Cap Fund  Direct Plan,flexi_4,120843
-quant Focused Fund  Direct Plan,flexi_4,120834
-SUNDARAM CONSUMPTION FUND,flexi_4,102142
-SUNDARAM ELSS TAX SAVER FUND,flexi_4,149570
-SUNDARAM SERVICES FUND REGULAR,flexi_4,144838
-Union Balanced Advantage Direct,hybrid_5,142038
-Union Multicap Fund  Regular Plan,flexi_4,150855
-UTI Nifty Alpha low-volatility 30,flexi_4,153086
-UTI Nifty Midsmall 400 mom-QA 100,flexi_4,153272
+name,code,id
+ABSL Flexi cap regular,103166,flexi_4
+Aditya Birla Sun Life Gold Fund - Growth - Direct Plan,120546,hedge_6
+Bandhan ELSS Tax saver FundGrowth,111569,flexi_4
+Canara Robeco Flexi Cap Fund,101922,flexi_4
+Canara Robeco Infrastructure,103390,flexi_4
+Canara Robeco Large and Mid Direct,118278,mid_2
+Canara Robeco Large Cap Direct,118269,large_3
+Canara Robeco Small Cap Fund,146127,small_1
+ICICI Pru Nifty 200 momentum 30,150452,flexi_4
+ICICI Prudential Balanced Advantage Fund - Direct Plan -  Growth,120377,hybrid_5
+ICICI Prudential Focused Equity Fund - Direct Plan - Growth,120722,flexi_4
+Invesco India Global Equity Income FOF Direct,129188,hedge_6
+Invesco India Midcap Fund Direct,120403,mid_2
+Invesco India Multi Asset Allocation Direct,153047,hedge_6
+Invesco India Small Cap Fund,145139,small_1
+NIPPON INDIA GROWTH FUND,118668,mid_2
+NIPPON INDIA RETIREMENT FUND - WEALTH CREATION,133566,large_3
+quant Flexi Cap Fund  Direct Plan,120843,flexi_4
+quant Focused Fund  Direct Plan,120834,flexi_4
+SUNDARAM CONSUMPTION FUND,102142,flexi_4
+SUNDARAM ELSS TAX SAVER FUND,149570,flexi_4
+SUNDARAM SERVICES FUND REGULAR,144838,flexi_4
+Union Balanced Advantage Direct,142038,hybrid_5
+Union Multicap Fund  Regular Plan,150855,flexi_4
+UTI Nifty Alpha low-volatility 30,153086,flexi_4
+UTI Nifty Midsmall 400 mom-QA 100,153272,flexi_4
