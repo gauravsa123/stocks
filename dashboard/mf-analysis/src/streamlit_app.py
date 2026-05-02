@@ -127,7 +127,7 @@ class StreamlitLogWriter(io.StringIO):
         pass
 
 
-@st.cache_data(show_spinner=False)
+# @st.cache_data(show_spinner=False)
 def load_analysis(csv_path: str, cutoff: str):
     return run_analysis(csv_path, cutoff=cutoff)
 
