@@ -317,6 +317,10 @@ with st.sidebar:
 
     st.markdown("---")
 
+# ── Resolve csv_path and cutoff_str ──────────────────────────────────────────
+csv_path   = save_portfolio_csv()
+cutoff_str = cutoff_date.strftime("%Y-%m-%d")
+
 # ── Trigger Analysis ──────────────────────────────────────────────────────────
 cache_key = f"{csv_path}_{cutoff_str}"
 
