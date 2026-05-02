@@ -16,7 +16,8 @@ from main import (
     run_analysis, RATIO_NAMES, BENCHMARK_IDX, ALL_MFs, PORTFOLIO_PATH, DEFAULT_CUTOFF
 )
 
-CATEGORY_OPTIONS = ["large_3", "mid_2", "small_1", "flexi_4"]
+CATEGORY_OPTIONS = ["small_1", "mid_2", "large_3", "flexi_4", "hybrid_5", 
+                    "hedge_6", "global_7"]
 
 # ── AMFI Fund Search ──────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="Fetching AMFI fund list...")
