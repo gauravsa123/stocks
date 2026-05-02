@@ -10,6 +10,8 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import uuid
 
+import io
+
 from main import (
     run_analysis, RATIO_NAMES, BENCHMARK_IDX, ALL_MFs, PORTFOLIO_PATH, DEFAULT_CUTOFF
 )
@@ -107,8 +109,25 @@ st.title("📊 Mutual Fund Analysis Dashboard")
 st.markdown("Risk ratios, rolling performance & ATH change analysis.")
 
 # ── Run Analysis ──────────────────────────────────────────────────────────────
-@st.cache_data(show_spinner="⏳ Fetching data & computing ratios... this may take a few minutes.")
-def load_analysis(csv_path: str, cutoff: str):        # ← cutoff added
+class StreamlitLogWriter(io.StringIO):
+    """Redirects print() output to a Streamlit container in real time."""
+    def __init__(self, container):
+        super().__init__()
+        self._container = container
+        self._lines = []
+
+    def write(self, msg):
+        if msg.strip():
+            self._lines.append(msg)
+            self._container.code("\n".join(self._lines[-50:]))  # show last 50 lines
+        return len(msg)
+
+    def flush(self):
+        pass
+
+
+@st.cache_data(show_spinner=False)
+def load_analysis(csv_path: str, cutoff: str):
     return run_analysis(csv_path, cutoff=cutoff)
 
 
@@ -308,8 +327,21 @@ if not csv_path or not os.path.exists(csv_path):
     st.info("👈 Search and add funds to your portfolio, then click **Run Analysis**.")
     st.stop()
 
-cutoff_str = cutoff_date.strftime("%Y-%m-%d")        # pass to analysis
-mf_df, mf_fall, my_mf_names = load_analysis(csv_path, cutoff_str)
+cutoff_str = cutoff_date.strftime("%Y-%m-%d")
+
+with st.status("⏳ Fetching data & computing ratios...", expanded=True) as status:
+    log_container = st.empty()
+    writer = StreamlitLogWriter(log_container)
+    old_stdout = sys.stdout
+    sys.stdout = writer
+    try:
+        mf_df, mf_fall, my_mf_names = load_analysis(csv_path, cutoff_str)
+        status.update(label="✅ Analysis complete!", state="complete", expanded=False)
+    except Exception as e:
+        status.update(label=f"❌ Error: {e}", state="error")
+        st.stop()
+    finally:
+        sys.stdout = old_stdout
 
 # Drop rolling columns for display
 display_cols = ['name', 'id', 'nav', 'returns_%'] + RATIO_NAMES
