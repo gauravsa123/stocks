@@ -80,7 +80,7 @@ def cleanup_old_sessions(max_age_hours: int = 24):
                 os.remove(fpath)
 
 
-cleanup_old_sessions()
+# cleanup_old_sessions()
 
 # ── Init session state ────────────────────────────────────────────────────────
 # Persist session_id in URL so same browser restores the same portfolio
@@ -130,7 +130,6 @@ class StreamlitLogWriter(io.StringIO):
 @st.cache_data(show_spinner=False)
 def load_analysis(csv_path: str, cutoff: str):
     return run_analysis(csv_path, cutoff=cutoff)
-
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -319,30 +318,30 @@ with st.sidebar:
     st.markdown("---")
 
 # ── Trigger Analysis ──────────────────────────────────────────────────────────
+cache_key = f"{csv_path}_{cutoff_str}"
+
 if run_btn:
-    st.cache_data.clear()
+    st.session_state.pop("analysis_result", None)
+    st.session_state.pop("analysis_key", None)
 
-csv_path = save_portfolio_csv()
+if st.session_state.get("analysis_key") != cache_key or "analysis_result" not in st.session_state:
+    with st.status("⏳ Fetching data & computing ratios...", expanded=True) as status:
+        log_container = st.empty()
+        writer = StreamlitLogWriter(log_container)
+        old_stdout = sys.stdout
+        sys.stdout = writer
+        try:
+            result = load_analysis(csv_path, cutoff_str)
+            st.session_state["analysis_result"] = result
+            st.session_state["analysis_key"] = cache_key
+            status.update(label="✅ Analysis complete!", state="complete", expanded=False)
+        except Exception as e:
+            status.update(label=f"❌ Error: {e}", state="error")
+            st.stop()
+        finally:
+            sys.stdout = old_stdout
 
-if not csv_path or not os.path.exists(csv_path):
-    st.info("👈 Search and add funds to your portfolio, then click **Run Analysis**.")
-    st.stop()
-
-cutoff_str = cutoff_date.strftime("%Y-%m-%d")
-
-with st.status("⏳ Fetching data & computing ratios...", expanded=True) as status:
-    log_container = st.empty()
-    writer = StreamlitLogWriter(log_container)
-    old_stdout = sys.stdout
-    sys.stdout = writer
-    try:
-        mf_df, mf_fall, my_mf_names = load_analysis(csv_path, cutoff_str)
-        status.update(label="✅ Analysis complete!", state="complete", expanded=False)
-    except Exception as e:
-        status.update(label=f"❌ Error: {e}", state="error")
-        st.stop()
-    finally:
-        sys.stdout = old_stdout
+mf_df, mf_fall, my_mf_names = st.session_state["analysis_result"]
 
 # Drop rolling columns for display
 display_cols = ['name', 'id', 'nav', 'returns_%'] + RATIO_NAMES
