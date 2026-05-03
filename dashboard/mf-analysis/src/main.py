@@ -150,6 +150,35 @@ def rolling_results(hist_df, mf_cat, riskfree_market_df, benchmark_df):
     return roll_result_df.to_dict(orient='list')
 
 
+def rolling_cagr_median(df, roll_lengths=[12], years=1):
+    """
+    Calculate rolling CAGR and return median for each roll length.
+    
+    Args:
+        df: DataFrame with 'Close' column and DatetimeIndex
+        roll_lengths: list of rolling window lengths in months
+        years: number of years for CAGR calculation
+    
+    Returns:
+        dict: {roll_len: median_cagr} for each roll length
+    """
+    df = df.copy()
+    df['Month'] = df.index.strftime('%Y-%m')
+    months = df['Month'].unique()
+
+    medians = {}
+    for roll_len in roll_lengths:
+        rolling_returns = []
+        for i in range(len(months) - roll_len + 1):
+            roll_months = months[i:i + roll_len]
+            roll_df = df[df['Month'].isin(roll_months)]
+            cagr = (roll_df['Close'].iloc[-1] / roll_df['Close'].iloc[0]) ** (1 / years) - 1
+            rolling_returns.append(cagr * 100)
+        medians[f'roll_{roll_len}'] = round(np.median(rolling_returns), 2)
+
+    return medians
+
+
 # ── Portfolio / All MFs ───────────────────────────────────────────────────────
 def load_mf_df(csv_path: str = None):
     path = csv_path or DATA_PATH
@@ -195,6 +224,7 @@ def run_analysis(csv_path: str = None, cutoff: str = DEFAULT_CUTOFF):
     ratios         = {k: [] for k in RATIO_NAMES}
     rolling_r      = {k: [] for k in RATIO_NAMES}
     returns_report = {}
+    rolling_returns = {}
 
     total = len(mf_df)
     for i, (idx, row) in enumerate(mf_df.iterrows(), 1):
@@ -230,6 +260,9 @@ def run_analysis(csv_path: str = None, cutoff: str = DEFAULT_CUTOFF):
             else:
                 returns_report[row['name']] = np.nan
 
+            #  1 year Rolling returns
+            rolling_returns[row['name']] = rolling_cagr_median(df.copy(), [36], years=3)
+
         except Exception as e:
             print(f"  ⚠ Skipped {row['name']}: {e}")
             latest.append(np.nan)
@@ -245,6 +278,11 @@ def run_analysis(csv_path: str = None, cutoff: str = DEFAULT_CUTOFF):
     mf_df['returns_%'] = mf_df['name'].map(returns_report)
     for k in RATIO_NAMES:
         mf_df[f'rolling_{k}'] = rolling_r[k]
+
+    # 1 year Rolling returns
+    rolling_keys = list(next(iter(rolling_returns.values())).keys())
+    for k in rolling_keys:
+        mf_df[k] = mf_df['name'].map(lambda x: rolling_returns.get(x, {}).get(k, np.nan))
 
     return mf_df, mf_fall, my_mf_names
 
@@ -332,7 +370,7 @@ if __name__ == '__main__':
 
     # Save results
     out_csv = os.path.join(os.path.dirname(__file__), '../output/mf_results.csv')
-    mf_df[['name', 'id', 'code', 'nav', 'returns_%'] + RATIO_NAMES].to_csv(out_csv, index=False)
+    mf_df[['name', 'id', 'code', 'nav', 'returns_%', 'roll_12'] + RATIO_NAMES].to_csv(out_csv, index=False)
     print(f"\nResults saved to {out_csv}")
 
     plot_ath_change(mf_fall, my_mf_names)

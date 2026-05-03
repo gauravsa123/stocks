@@ -348,7 +348,7 @@ if st.session_state.get("analysis_key") != cache_key or "analysis_result" not in
 mf_df, mf_fall, my_mf_names = st.session_state["analysis_result"]
 
 # Drop rolling columns for display
-display_cols = ['name', 'id', 'nav', 'returns_%'] + RATIO_NAMES
+display_cols = ['name', 'id', 'nav', 'returns_%', 'roll_36'] + RATIO_NAMES
 summary_df   = mf_df[display_cols].copy()
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
